@@ -37,3 +37,24 @@ This scalable and intelligent solution empowers stakeholders—**municipalities,
 
 ## 🗂️ ER Diagram:
 ![ER Diagram](./ER%20DIAGRAM.png)
+
+## Login Page:
+![Login Page](./Login.png)
+
+## User Dashboard:
+![User Dashboard](./dashboard.png)
+
+## User Settings:
+![User Settings](./userSettings.png)
+
+## Admin Panel:
+![Admin Panel](./admin_panel.png)
+
+## Manage Users Database - From Admin side:
+![Manage Users Database](./Manage_users.png)
+
+## Manage Sensors - From Admin Side:
+![Manage Sensors](./Manage_sensors.png)
+
+## Billing Management:
+![Billing Management](./Billing_management.png)
