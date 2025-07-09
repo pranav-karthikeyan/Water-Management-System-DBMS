@@ -36,4 +36,4 @@ This scalable and intelligent solution empowers stakeholders—**municipalities,
 ---
 
 ## 🗂️ ER Diagram:
-![ER Diagram](./ER%20Diagram.png)
+![ER Diagram](./ER%20DIAGRAM.png)
