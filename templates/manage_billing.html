@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Billing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .add-bill-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #007bff;
+            color: white;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Manage Billing</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Amount Due</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="billing-table">
+                <!-- Billing data will be populated here -->
+            </tbody>
+        </table>
+
+        <h2>Add New Bill</h2>
+        <div class="add-bill-form">
+            <form id="add-bill-form">
+                <label for="user_id">User ID:</label>
+                <input type="number" id="user_id" name="user_id" required>
+
+                <label for="amount_due">Amount Due:</label>
+                <input type="number" id="amount_due" name="amount_due" required>
+
+                <label for="due_date">Due Date:</label>
+                <input type="date" id="due_date" name="due_date" required>
+
+                <button type="submit" class="btn submit-btn">Add Bill</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function fetchBillingData() {
+            fetch("{{ url_for('app.get_billing_data') }}")
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("billing-table");
+                    tableBody.innerHTML = "";
+                    data.forEach(bill => {
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td>${bill.user_id}</td>
+                                <td>${bill.amount_due}</td>
+                                <td>${bill.due_date}</td>
+                                <td>
+                                    <button class="btn btn-edit" onclick="editBill(${bill.bill_id})">Edit</button>
+                                    <button class="btn btn-delete" onclick="deleteBill(${bill.bill_id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(error => console.error("Error fetching billing data:", error));
+        }
+
+        document.getElementById("add-bill-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            let formData = new FormData(event.target);
+            
+            fetch("{{ url_for('app.add_bill') }}", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchBillingData();
+                event.target.reset();
+            })
+            .catch(error => console.error("Error adding bill:", error));
+        });
+
+        function deleteBill(billId) {
+            fetch(`{{ url_for('app.delete_bill') }}?bill_id=${billId}`, { method: "DELETE" })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchBillingData();
+                })
+                .catch(error => console.error("Error deleting bill:", error));
+        }
+
+        function editBill(billId) {
+            let newAmount = prompt("Enter new amount due:");
+            let newDueDate = prompt("Enter new due date (YYYY-MM-DD):");
+            
+            if (newAmount && newDueDate) {
+                fetch("{{ url_for('app.update_bill') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ bill_id: billId, amount_due: newAmount, due_date: newDueDate })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchBillingData();
+                })
+                .catch(error => console.error("Error updating bill:", error));
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchBillingData);
+    </script>
+
+</body>
+</html>

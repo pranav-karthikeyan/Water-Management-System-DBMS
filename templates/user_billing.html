@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <span class="portal-name">WDS Portal</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('app.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('app.user_billing') }}" class="active">Billing</a></li>
+            <li><a href="{{ url_for('app.contact') }}">Contact</a></li>
+        </ul>
+        <div class="user-dropdown">
+            <img src="{{ url_for('static', filename=(user['profile_pic'] if user['profile_pic'] else 'default.png')) }}" alt="User Avatar" class="user-avatar">
+            <span class="username">{{ user['name'] }}</span>
+            <div class="dropdown-content">
+                <a href="{{ url_for('app.user_settings') }}">User Settings</a>
+                <a href="{{ url_for('app.logout') }}" class="logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Billing Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-info">
+            <h2>Billing Details</h2>
+            <p>Your recent water usage and payment details.</p>
+        </div>
+
+        <!-- Billing Table -->
+        <div class="service-container">
+            <h2>Billing History</h2>
+            <table>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>User ID</th>
+                    <th>Total Amount (₹)</th>
+                    <th>Payment Status</th>
+                </tr>
+                {% for bill in billing_data %}
+                <tr>
+                    <td>{{ bill.bill_id }}</td>
+                    <td>{{ bill.water_used }}</td>
+                    <td>{{ bill.totalamt }}</td>
+                    <td class="{% if bill.payment_status == 'Paid' %}paid-status{% else %}unpaid-status{% endif %}">
+                        {{ bill.payment_status }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+</html>

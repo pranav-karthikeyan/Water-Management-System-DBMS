@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <span class="portal-name">WDS Portal</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('app.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('app.user_billing') }}">Billing</a></li>
+            <li><a href="{{ url_for('app.contact') }}">Contact</a></li>
+        </ul>
+        <div class="user-dropdown">
+            <img src="{{ url_for('static', filename=(user['profile_pic'] if user['profile_pic'] else 'default.png')) }}" alt="User Avatar" class="user-avatar">
+            <span class="username">{{ user['name'] }}</span>
+            <div class="dropdown-content">
+                <a href="{{ url_for('app.user_settings') }}">User Settings</a>
+                <a href="{{ url_for('app.logout') }}" class="logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <div class="dashboard-info">
+            <h2>Welcome, {{ user['name'] }}</h2>
+            <p>Total Sensors: {{ tot_sensors }}</p>
+        </div>
+
+        <!-- Service Request Section -->
+        <div class="service-container">
+            <h2>Service Requests</h2>
+            <table>
+                <tr>
+                    <th>Service Needed</th>
+                    <th>Admin Note</th>
+                    <th>Toggle Service</th>
+                </tr>
+                <tr>
+                    <td id="serviceStatus">{{ "Yes" if service_needed == "Yes" else "No" }}</td>
+                    <td id="adminNote">{{ service_status if service_status else "Complaint Raised" if service_needed == "Yes" else "-" }}</td>
+                    <td>
+                        <button id="serviceToggleBtn" onclick="toggleService()">
+                            {{ "Cancel Request" if service_needed == 'Yes' else "Raise Complaint" }}
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+</html>

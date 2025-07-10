@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Dashboard</title>
+    
+    <!-- Google Fonts & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #007bff;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: white !important;
+        }
+
+        /* Table Styling */
+        .table th {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            color: white;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn-status, .btn-add {
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-paid { background-color: green; color: white; }
+        .btn-unpaid { background-color: red; color: white; }
+        .btn-add { background-color: #007bff; color: white; margin-top: 15px; }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+
+        .modal button {
+            padding: 8px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .btn-close {
+            background: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Water Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('app.admin_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('app.billing') }}">Billing</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('app.logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Billing Table -->
+    <div class="container mt-4">
+        <h3>Billing Information</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>User ID</th>
+                    <th>Amount Due (₹)</th>
+                    <th>Due Date</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="billing-table-body">
+                <!-- Bills will be loaded dynamically -->
+            </tbody>
+        </table>
+
+        <!-- Add New Bill Button -->
+        <button class="btn-add" onclick="openModal()">➕ Add New Bill</button>
+    </div>
+
+    <!-- Add Bill Modal -->
+    <div id="addBillModal" class="modal">
+        <div class="modal-content">
+            <h4>Add New Bill</h4>
+            <input type="number" id="userID" placeholder="Enter User ID" required>
+            <input type="number" id="amountDue" placeholder="Enter Amount Due" required>
+            <input type="date" id="dueDate" required>
+            <button onclick="addBill()">Submit</button>
+            <button class="btn-close" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchBillingData();
+        });
+
+        function fetchBillingData() {
+            fetch("{{ url_for('app.get_billing_data') }}")
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("billing-table-body");
+                    tableBody.innerHTML = "";
+
+                    data.forEach(bill => {
+                        let statusClass = bill.Payment_Status === "Paid" ? "paid" : "pending";
+                        let row = `
+                            <tr id="bill-${bill.Bill_id}">
+                                <td>${bill.Bill_id}</td>
+                                <td>${bill.CID}</td>
+                                <td>${bill.Amount_Due}</td>
+                                <td>${bill.Due_Date}</td>
+                                <td class="${statusClass}" id="status-${bill.Bill_id}">${bill.Payment_Status}</td>
+                                <td>
+                                    <button class="btn-status btn-paid" onclick="updateStatus(${bill.Bill_id}, 'Paid')">Mark as Paid</button>
+                                    <button class="btn-status btn-unpaid" onclick="updateStatus(${bill.Bill_id}, 'Pending')">Mark as Unpaid</button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                });
+        }
+
+        function updateStatus(billId, newStatus) {
+            fetch("{{ url_for('app.update_billing_status') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ bill_id: billId, payment_status: newStatus }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById(`status-${billId}`).textContent = newStatus;
+                } else {
+                    alert("Error updating status!");
+                }
+            });
+        }
+
+        function openModal() {
+            document.getElementById("addBillModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("addBillModal").style.display = "none";
+        }
+
+        function addBill() {
+            let userID = document.getElementById("userID").value;
+            let amountDue = document.getElementById("amountDue").value;
+            let dueDate = document.getElementById("dueDate").value;
+
+            if (!userID || !amountDue || !dueDate) {
+                alert("All fields are required!");
+                return;
+            }
+
+            fetch("{{ url_for('app.add_new_bill') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userID, amount_due: amountDue, due_date: dueDate }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeModal();
+                    fetchBillingData(); // Refresh table
+                } else {
+                    alert("Error adding bill!");
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
