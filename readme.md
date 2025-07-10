@@ -1,15 +1,16 @@
 ## 👥 Contributors:
 - **Pranav Karthikeyan** - `CB.EN.U4ELC22062`  
 - **Nivedhitha G** - `CB.EN.U4ELC22036`
-
----
+  
+---  
 
 ## 📌 Abstract:
-
+     
 Water wastage and inefficiencies in distribution remain critical challenges, leading to resource depletion, high operational costs, and energy inefficiency.
-
+      
 This project proposes an **IoT-enabled Smart Water Distribution System** that integrates real-time monitoring, database management, and adaptive control to:
-
+                                                                                                                      
+    
 - Optimize water usage 💧  
 - Detect leakages 🚨  
 - Enhance sustainability 🌱  
